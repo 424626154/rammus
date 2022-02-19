@@ -3,6 +3,7 @@ version '1.0-SNAPSHOT'
 
 buildscript {
     ext.kotlin_version = '1.3.70'
+    ext.ali_push_version = '3.7.3'
     repositories {
         google()
         jcenter()
@@ -21,7 +22,10 @@ rootProject.allprojects {
         maven {
             url 'http://maven.aliyun.com/nexus/content/repositories/releases/'
         }
-
+        // 配置HMS Core SDK的Maven仓地址。
+        maven {
+            url 'https://developer.huawei.com/repo/'
+        }
     }
 }
 
@@ -37,7 +41,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        //consumerProguardFiles 'consumer-proguard-rules.pro'
+        consumerProguardFiles 'consumer-proguard-rules.pro'
     }
     lintOptions {
         disable 'InvalidPackage'
@@ -47,16 +51,23 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    api 'com.aliyun.ams:alicloud-android-push:3.1.9.1'
-    api 'com.aliyun.ams:alicloud-android-third-push:3.1.0@aar'
-    /*implementation 'com.aliyun.ams:huawei-push:2.6.3.305'
-    implementation 'com.aliyun.ams:huawei-push-base:2.6.3.305'
-    implementation 'com.google.firebase:firebase-messaging:17.6.0'
-    implementation 'com.aliyun.ams:meizu-push:3.8.7.1'
-    implementation 'com.aliyun.ams:third_vivopush:2.9.0.1'*/
-    compileOnly 'com.aliyun.ams:huawei-push:2.6.3.305'
+    api "com.aliyun.ams:alicloud-android-push:$ali_push_version"
+    api "com.aliyun.ams:alicloud-android-third-push:$ali_push_version"
+    //华为依赖
+    implementation "com.aliyun.ams:alicloud-android-third-push-huawei:$ali_push_version"
+    //小米依赖
+    implementation "com.aliyun.ams:alicloud-android-third-push-xiaomi:$ali_push_version"
+    //OPPO依赖
+    implementation "com.aliyun.ams:alicloud-android-third-push-oppo:$ali_push_version"
+    //vivo依赖
+    implementation "com.aliyun.ams:alicloud-android-third-push-vivo:$ali_push_version"
+    //魅族依赖
+    implementation "com.aliyun.ams:alicloud-android-third-push-meizu:$ali_push_version"
+    //谷歌依赖
+    implementation "com.aliyun.ams:alicloud-android-third-push-fcm:$ali_push_version"
+    /*compileOnly 'com.aliyun.ams:huawei-push:2.6.3.305'
     compileOnly 'com.aliyun.ams:huawei-push-base:2.6.3.305'
     compileOnly 'com.google.firebase:firebase-messaging:17.6.0'
     compileOnly 'com.aliyun.ams:meizu-push:3.8.7.1'
-    compileOnly 'com.aliyun.ams:third_vivopush:2.9.0.1'
+    compileOnly 'com.aliyun.ams:third_vivopush:2.9.0.1'*/
 }

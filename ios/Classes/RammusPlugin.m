@@ -1,4 +1,7 @@
+
 #import "RammusPlugin.h"
+
+
 
 NSString *_isSuccessful = @"isSuccessful";
 
@@ -164,6 +167,10 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
     NSLog(@"didFailToRegisterForRemoteNotificationsWithError %@", error);
 }
 
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    NSLog(@"applicationDidEnterBackground");
+}
+
 
 #pragma mark SDK Init
 
@@ -203,7 +210,6 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
 */
 - (void)onChannelOpened:(NSNotification *)notification {
 }
-
 
 #pragma mark Receive Message
 
@@ -301,6 +307,9 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
         result[@"messageId"] = request.identifier;
     }
     if (fromFront) {
+        if (extras != nil) {
+            result[@"extras"] = extras;
+        }
         [_methodChannel invokeMethod:@"onNotification" arguments:result];
     } else {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -582,11 +591,36 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
     int num = [call.arguments[@"num"] intValue];
 
     [CloudPushSDK syncBadgeNum:num withCallback:^(CloudPushCallbackResult *res) {
-
+        if (res.success) {
+                    NSLog(@"\n ====== 同步通知角标数到服务端成功Sync badge num: [%lu] success.", (unsigned long)num);
+                } else {
+                    NSLog(@"\n ====== 同步通知角标数到服务端失败Sync badge num: [%lu] failed, error: %@", (unsigned long)num, res.error);
+                }
     }];
 
+    [self setBageNumber:num];
+    
     result(@YES);
 
+}
+
+
+
+//不在appIcon上显示推送数量，但是在系统通知栏保留推送通知的方法
+-(void)setBageNumber:(int)num{
+    if(IS_IOS11_LATER){
+        /*
+         iOS 11后，直接设置badgeNumber = -1就生效了
+         */
+ 
+        [UIApplication sharedApplication].applicationIconBadgeNumber = num;
+    }else{
+        UILocalNotification *clearEpisodeNotification = [[UILocalNotification alloc] init];
+        clearEpisodeNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:(0.3)];
+        clearEpisodeNotification.timeZone = [NSTimeZone defaultTimeZone];
+        clearEpisodeNotification.applicationIconBadgeNumber = num;
+        [[UIApplication sharedApplication] scheduleLocalNotification:clearEpisodeNotification];
+    }
 }
 
 @end

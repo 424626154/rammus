@@ -70,6 +70,24 @@ Future<String?> get deviceId async {
   return _channel.invokeMethod("deviceId");
 }
 
+Future<String?> getHuaweiToken(String huaweiAppId) async {
+  return _channel.invokeMethod("getHuaweiToken",{"huaweiAppId":huaweiAppId});
+}
+
+Future<String?> getXiaomiRegId() async {
+  return _channel.invokeMethod("getXiaomiRegId");
+}
+
+Future<String?> getVivoRegId() async {
+  return _channel.invokeMethod("getVivoRegId");
+}
+
+Future<String?> getOppoRegId() async {
+  return _channel.invokeMethod("getOppoRegId");
+}
+
+
+
 Future<CommonCallbackResult> get pushChannelStatus async {
   var result = await _channel.invokeMethod("checkPushChannelStatus");
 
