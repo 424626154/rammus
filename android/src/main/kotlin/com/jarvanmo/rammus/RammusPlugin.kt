@@ -1,5 +1,8 @@
 package com.jarvanmo.rammus
 
+import android.content.pm.ApplicationInfo
+import android.os.Bundle
+import android.net.Uri
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -33,143 +36,25 @@ class RammusPlugin : FlutterPlugin, MethodCallHandler {
     companion object {
         private const val TAG = "RammusPlugin"
         private val inHandler = Handler()
-
+        private var gottenApplication : Application? = null
         @JvmStatic
         fun registerWith(registrar: Registrar) {
             val instance = RammusPlugin()
             instance.onAttachedToEngine(registrar.context(), registrar.messenger())
         }
-
         @JvmStatic
-        fun initPushService(application: Application) {
-            createNotificationChannel(application);
+        fun initPushService(application: Application){
+//            createNotificationChannel(application);
+            gottenApplication = application
             PushServiceFactory.init(application.applicationContext)
             val pushService = PushServiceFactory.getCloudPushService()
-            pushService.register(application.applicationContext, object : CommonCallback {
-                override fun onSuccess(response: String?) {
-                    inHandler.postDelayed({
-                        RammusPushHandler.methodChannel?.invokeMethod(
-                            "initCloudChannelResult", mapOf(
-                                "isSuccessful" to true,
-                                "response" to response
-                            )
-                        )
-                    }, 2000)
-                }
-
-                override fun onFailed(errorCode: String?, errorMessage: String?) {
-                    inHandler.postDelayed({
-                        RammusPushHandler.methodChannel?.invokeMethod(
-                            "initCloudChannelResult", mapOf(
-                                "isSuccessful" to false,
-                                "errorCode" to errorCode,
-                                "errorMessage" to errorMessage
-                            )
-                        )
-                    }, 2000)
-                }
-            })
-//            pushService.setPushIntentService(RammusPushIntentService::class.java)
-            val appInfo = application.packageManager
-                .getApplicationInfo(application.packageName, PackageManager.GET_META_DATA)
-            val xiaomiAppId =
-                appInfo.metaData.getString("com.xiaomi.push.client.app_id")?.removePrefix("xiaomi_")
-            val xiaomiAppKey = appInfo.metaData.getString("com.xiaomi.push.client.app_key")
-                ?.removePrefix("xiaomi_")
-            if ((xiaomiAppId != null && xiaomiAppId.isNotBlank())
-                && (xiaomiAppKey != null && xiaomiAppKey.isNotBlank())
-            ) {
-                Log.d(TAG, "正在注册小米推送服务...")
-                MiPushRegister.register(
-                    application.applicationContext,
-                    xiaomiAppId,
-                    xiaomiAppKey
-                )
-            }
-            val huaweiAppId = appInfo.metaData.get("com.huawei.hms.client.appid")
-            if (huaweiAppId != null && huaweiAppId.toString().isNotBlank()) {
-                Log.d(TAG, "正在注册华为推送服务...")
-                HuaWeiRegister.register(application)
-            }
-            val oppoAppKey =
-                appInfo.metaData.getString("com.oppo.push.client.app_key")?.removePrefix("oppo_")
-            val oppoAppSecret =
-                appInfo.metaData.getString("com.oppo.push.client.app_secret")?.removePrefix("oppo_")
-            if ((oppoAppKey != null && oppoAppKey.isNotBlank())
-                && (oppoAppSecret != null && oppoAppSecret.isNotBlank())
-            ) {
-                Log.d(TAG, "正在注册Oppo推送服务...")
-                OppoRegister.register(
-                    application.applicationContext,
-                    oppoAppKey,
-                    oppoAppSecret
-                )
-            }
-            val meizuAppId =
-                appInfo.metaData.getString("com.meizu.push.client.app_id")?.removePrefix("meizu_")
-            val meizuAppKey =
-                appInfo.metaData.getString("com.meizu.push.client.app_key")?.removePrefix("meizu_")
-            if ((meizuAppId != null && meizuAppId.isNotBlank())
-                && (meizuAppKey != null && meizuAppKey.isNotBlank())
-            ) {
-                Log.d(TAG, "正在注册魅族推送服务...")
-                MeizuRegister.register(
-                    application.applicationContext,
-                    meizuAppId,
-                    meizuAppKey
-                )
-            }
-            val vivoAppId = appInfo.metaData.get("com.vivo.push.app_id")
-            val vivoApiKey = appInfo.metaData.get("com.vivo.push.api_key")
-            if ((vivoAppId != null && vivoAppId.toString().isNotBlank())
-                && (vivoApiKey != null && vivoApiKey.toString().isNotBlank())
-            ) {
-                Log.d(TAG, "正在注册Vivo推送服务...")
-                VivoRegister.register(application.applicationContext)
-            }
-            val gcmSendId = appInfo.metaData.getString("com.gcm.push.send_id")?.removePrefix("gcm_")
-            val gcmApplicationId =
-                appInfo.metaData.getString("com.gcm.push.app_id")?.removePrefix("gcm_")
-            if ((gcmSendId != null && gcmSendId.isNotBlank())
-                && (gcmApplicationId != null && gcmApplicationId.isNotBlank())
-            ) {
-                Log.d(TAG, "正在注册Gcm推送服务...")
-                GcmRegister.register(
-                    application.applicationContext,
-                    gcmSendId,
-                    gcmApplicationId
-                )
-            }
-        }
-
-        private fun createNotificationChannel(application: Application) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val mNotificationManager =
-                    application.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
-                // 通知渠道的id
-                val id = "1"
-                // 用户可以看到的通知渠道的名字.
-                val name: CharSequence = "新消息通知"
-                // 用户可以看到的通知渠道的描述
-                val description = "新消息通知"
-                val importance = NotificationManager.IMPORTANCE_HIGH
-                val mChannel = NotificationChannel(id, name, importance)
-                // 配置通知渠道的属性
-                mChannel.description = description
-                // 设置通知出现时的闪灯（如果 android 设备支持的话）
-                mChannel.enableLights(true)
-                mChannel.lightColor = Color.RED
-                // 设置通知出现时的震动（如果 android 设备支持的话）
-                mChannel.enableVibration(true)
-                mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
-                //最后在notificationmanager中创建该通知渠道
-                mNotificationManager!!.createNotificationChannel(mChannel)
-            }
+            pushService.setPushIntentService(RammusPushIntentService::class.java)
         }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "register" -> register()
             "deviceId" -> result.success(PushServiceFactory.getCloudPushService().deviceId)
             "turnOnPushChannel" -> turnOnPushChannel(result)
             "turnOffPushChannel" -> turnOffPushChannel(result)
@@ -185,13 +70,118 @@ class RammusPlugin : FlutterPlugin, MethodCallHandler {
             "setupNotificationManager" -> setupNotificationManager(call, result)
             "bindPhoneNumber" -> bindPhoneNumber(call, result)
             "unbindPhoneNumber" -> unbindPhoneNumber(result)
-            "getHuaweiToken" -> getHuaweiToken(call, result)
-            "getXiaomiRegId" -> getXiaomiRegId(result)
-            "getVivoRegId" -> getVivoRegId(result)
-            "getOppoRegId" -> getOppoRegId(result)
+            "applicationBadgeNumberClean" ->setApplicationBadgeNumber(call)
             else -> result.notImplemented()
         }
 
+    }
+
+    private fun register() {
+        if (gottenApplication == null) {
+            Log.w(TAG, "注册推送服务失败，请检查是否在运行本语句前执行了`RammusPlugin.initPushService`.")
+            return;
+        }
+        var application = gottenApplication!!
+        val pushService = PushServiceFactory.getCloudPushService()
+        pushService.register(application.applicationContext, object : CommonCallback {
+            override fun onSuccess(response: String?) {
+                inHandler.postDelayed({
+                    RammusPushHandler.methodChannel?.invokeMethod(
+                        "initCloudChannelResult", mapOf(
+                            "isSuccessful" to true,
+                            "response" to response
+                        )
+                    )
+                }, 2000)
+            }
+
+            override fun onFailed(errorCode: String?, errorMessage: String?) {
+                inHandler.postDelayed({
+                    RammusPushHandler.methodChannel?.invokeMethod(
+                        "initCloudChannelResult", mapOf(
+                            "isSuccessful" to false,
+                            "errorCode" to errorCode,
+                            "errorMessage" to errorMessage
+                        )
+                    )
+                }, 2000)
+            }
+        })
+//            pushService.setPushIntentService(RammusPushIntentService::class.java)
+        val appInfo = application.packageManager
+            .getApplicationInfo(application.packageName, PackageManager.GET_META_DATA)
+        val xiaomiAppId =
+            appInfo.metaData.getString("com.xiaomi.push.client.app_id")?.removePrefix("xiaomi_")
+        val xiaomiAppKey = appInfo.metaData.getString("com.xiaomi.push.client.app_key")
+            ?.removePrefix("xiaomi_")
+        if ((xiaomiAppId != null && xiaomiAppId.isNotBlank())
+            && (xiaomiAppKey != null && xiaomiAppKey.isNotBlank())
+        ) {
+            Log.d(TAG, "正在注册小米推送服务...")
+            MiPushRegister.register(
+                application.applicationContext,
+                xiaomiAppId,
+                xiaomiAppKey
+            )
+        }
+        val huaweiAppId = appInfo.metaData.get("com.huawei.hms.client.appid")
+        if (huaweiAppId != null && huaweiAppId.toString().isNotBlank()) {
+            Log.d(TAG, "正在注册华为推送服务...")
+            HuaWeiRegister.register(application)
+        }
+        val oppoAppKey =
+            appInfo.metaData.getString("com.oppo.push.client.app_key")?.removePrefix("oppo_")
+        val oppoAppSecret =
+            appInfo.metaData.getString("com.oppo.push.client.app_secret")?.removePrefix("oppo_")
+        if ((oppoAppKey != null && oppoAppKey.isNotBlank())
+            && (oppoAppSecret != null && oppoAppSecret.isNotBlank())
+        ) {
+            Log.d(TAG, "正在注册Oppo推送服务...")
+            OppoRegister.register(
+                application.applicationContext,
+                oppoAppKey,
+                oppoAppSecret
+            )
+        }
+        val meizuAppId =
+            appInfo.metaData.getString("com.meizu.push.client.app_id")?.removePrefix("meizu_")
+        val meizuAppKey =
+            appInfo.metaData.getString("com.meizu.push.client.app_key")?.removePrefix("meizu_")
+        if ((meizuAppId != null && meizuAppId.isNotBlank())
+            && (meizuAppKey != null && meizuAppKey.isNotBlank())
+        ) {
+            Log.d(TAG, "正在注册魅族推送服务...")
+            MeizuRegister.register(
+                application.applicationContext,
+                meizuAppId,
+                meizuAppKey
+            )
+        }
+        val vivoAppId = appInfo.metaData.get("com.vivo.push.app_id")
+        val vivoApiKey = appInfo.metaData.get("com.vivo.push.api_key")
+        if ((vivoAppId != null && vivoAppId.toString().isNotBlank())
+            && (vivoApiKey != null && vivoApiKey.toString().isNotBlank())
+        ) {
+            Log.d(TAG, "正在注册Vivo推送服务...")
+            VivoRegister.register(application.applicationContext)
+        }
+        val gcmSendId = appInfo.metaData.getString("com.gcm.push.send_id")?.removePrefix("gcm_")
+        val gcmApplicationId =
+            appInfo.metaData.getString("com.gcm.push.app_id")?.removePrefix("gcm_")
+        val gcmProjectId = appInfo.metaData.getString("com.gcm.push.project_id")?.removePrefix("gcm_")
+        val gcmApiKey = appInfo.metaData.getString("com.gcm.push.api_key")?.removePrefix("gcm_")
+        if ((gcmSendId != null && gcmSendId.isNotBlank())
+            && (gcmApplicationId != null && gcmApplicationId.isNotBlank())
+        ) {
+            Log.d(TAG, "正在注册Gcm推送服务...")
+            GcmRegister.register(
+                application.applicationContext,
+                gcmSendId,
+                gcmApplicationId,
+                gcmProjectId,
+                gcmApiKey
+            )
+        }
     }
 
 
@@ -665,5 +655,30 @@ class RammusPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
+    //设置android角标
+    private fun setApplicationBadgeNumber(call: MethodCall){
+        val appInfo = gottenApplication!!.packageManager
+            .getApplicationInfo(gottenApplication!!.packageName, PackageManager.GET_META_DATA)
 
+        var num = call.argument("num") as Int? ?: 0
+        setHuaWeiApplicationBadgeNumber(num,appInfo)
+
+    }
+
+    //清理华为角标 https://developer.huawei.com/consumer/cn/doc/development/Corner-Guides/30802
+    private fun setHuaWeiApplicationBadgeNumber(num: Int,appInfo: ApplicationInfo) {
+        val huaweiAppId = appInfo.metaData.getString("com.huawei.hms.client.appid")
+        if (huaweiAppId != null && huaweiAppId.toString().isNotBlank()){
+            try {
+                val bundle = Bundle()
+                bundle.putString("package", applicationContext?.packageName) // com.test.badge is your package name
+                bundle.putString("class", applicationContext?.packageName+".MainActivity") // com.test. badge.MainActivity is your apk main activity
+                bundle.putInt("badgenumber", num)
+                gottenApplication!!.contentResolver.call(Uri.parse("content://com.huawei.android.launcher.settings/badge/"), "change_badge", null, bundle)
+            } catch (e: Exception) {
+                Log.w(TAG, "setHuaWeiApplicationBadgeNumberClean: 失败"+e.message)
+            }
+        }
+
+    }
 }

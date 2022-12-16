@@ -21,6 +21,7 @@ class _MyAppState extends State<MyApp> {
     if (!Platform.isAndroid) {
       rammus.configureNotificationPresentationOption();
     }
+    rammus.register();
     rammus.initCloudChannelResult.listen((data) {
       print(
           "----------->init successful ${data.isSuccessful} ${data.errorCode} ${data.errorMessage}");

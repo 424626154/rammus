@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -97,6 +98,13 @@ Future<CommonCallbackResult> get pushChannelStatus async {
     errorCode: result["errorCode"],
     errorMessage: result["errorMessage"],
   );
+}
+
+/// 注册设备
+/// 仅在 Android 设备生效，且在 Android 端若希望插件正常工作，必须执行一次本方法
+/// 分离插件初始化与注册的过程，例如实现在用户同意了隐私政策后再进行远端注册，防止影响应用上架。
+void register() {
+  if (Platform.isAndroid) _channel.invokeMethod("register");
 }
 
 //  static Future<String> get platformVersion async {
@@ -338,8 +346,17 @@ Future configureNotificationPresentationOption(
       {"none": none, "sound": sound, "alert": alert, "badge": badge});
 }
 
+///这个方法仅针对iOS
+///同步远程角标
 Future badgeClean({int num: 0}) async {
-  return _channel.invokeMethod("badgeClean", {"num": num});
+  if (Platform.isIOS){
+    return _channel.invokeMethod("badgeClean", {"num": num});
+  }
+}
+
+///清理图标上的角标（包含ios，华为，其他平台需要自行实现）
+Future applicationBadgeNumberClean({int num: 0}) async {
+  return  _channel.invokeMethod("applicationBadgeNumberClean", {"num": num});
 }
 
 Future<dynamic> _handler(MethodCall methodCall) {

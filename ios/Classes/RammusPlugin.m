@@ -1,7 +1,4 @@
-
 #import "RammusPlugin.h"
-
-
 
 NSString *_isSuccessful = @"isSuccessful";
 
@@ -65,6 +62,8 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
         result(@YES);
     }else if([@"badgeClean" isEqualToString:call.method]){
              [self badgeClean:call result:result];
+    }else if([@"applicationBadgeNumberClean" isEqualToString:call.method]){
+                       [self applicationBadgeNumberClean:call result:result];
     }else {
         result(FlutterMethodNotImplemented);
     }
@@ -210,6 +209,7 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
 */
 - (void)onChannelOpened:(NSNotification *)notification {
 }
+
 
 #pragma mark Receive Message
 
@@ -599,7 +599,7 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
     }];
 
     [self setBageNumber:num];
-    
+
     result(@YES);
 
 }
@@ -612,7 +612,7 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
         /*
          iOS 11后，直接设置badgeNumber = -1就生效了
          */
- 
+
         [UIApplication sharedApplication].applicationIconBadgeNumber = num;
     }else{
         UILocalNotification *clearEpisodeNotification = [[UILocalNotification alloc] init];
@@ -621,6 +621,16 @@ UNNotificationPresentationOptions _notificationPresentationOption = UNNotificati
         clearEpisodeNotification.applicationIconBadgeNumber = num;
         [[UIApplication sharedApplication] scheduleLocalNotification:clearEpisodeNotification];
     }
+}
+
+- (void)applicationBadgeNumberClean:(FlutterMethodCall *)call result:(FlutterResult)result {
+
+    int num = [call.arguments[@"num"] intValue];
+
+   [UIApplication sharedApplication].applicationIconBadgeNumber = num ;
+
+    result(@YES);
+
 }
 
 @end
