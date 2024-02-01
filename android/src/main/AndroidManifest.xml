@@ -1,21 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.jarvanmo.rammus">
     <application>
-<!--        <service android:name=".RammusPushIntentService"-->
-<!--            android:exported="false"-->
-<!--            >-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.alibaba.push2.action.NOTIFICATION_OPENED" />-->
-<!--            </intent-filter>-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.alibaba.push2.action.NOTIFICATION_REMOVED" />-->
-<!--            </intent-filter>-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.alibaba.sdk.android.push.RECEIVE" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
-        <!--消息接收监听器-->
-        <receiver android:name=".RammusMessageReceiver" android:exported="false">
+        <service android:name=".RammusPushIntentService"
+            android:exported="false"
+            >
             <intent-filter>
                 <action android:name="com.alibaba.push2.action.NOTIFICATION_OPENED" />
             </intent-filter>
@@ -25,15 +13,6 @@
             <intent-filter>
                 <action android:name="com.alibaba.sdk.android.push.RECEIVE" />
             </intent-filter>
-        </receiver>
-<!--        如需覆盖 HmsMessageService getToken 未获得 onNewToken 回调-->
-<!--        <service android:name=".RammusHmsMessageService" android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.huawei.push.action.MESSAGING_EVENT"/>-->
-<!--            </intent-filter>-->
-<!--        </service>-->
-<!--        <meta-data-->
-<!--            android:name="push_kit_auto_init_enabled"-->
-<!--            android:value="true" />-->
+        </service>
     </application>
 </manifest>

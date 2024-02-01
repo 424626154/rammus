@@ -107,22 +107,22 @@ class RammusPlugin : FlutterPlugin, MethodCallHandler {
                 }, 2000)
             }
         })
-//            pushService.setPushIntentService(RammusPushIntentService::class.java)
         val appInfo = application.packageManager
             .getApplicationInfo(application.packageName, PackageManager.GET_META_DATA)
         val xiaomiAppId =
             appInfo.metaData.getString("com.xiaomi.push.client.app_id")?.removePrefix("xiaomi_")
         val xiaomiAppKey = appInfo.metaData.getString("com.xiaomi.push.client.app_key")
             ?.removePrefix("xiaomi_")
-        if ((xiaomiAppId != null && xiaomiAppId.isNotBlank())
-            && (xiaomiAppKey != null && xiaomiAppKey.isNotBlank())
+        if (!xiaomiAppId.isNullOrBlank()
+            && !xiaomiAppKey.isNullOrBlank()
         ) {
             Log.d(TAG, "正在注册小米推送服务...")
-            MiPushRegister.register(
+            var isMiPushRegister = MiPushRegister.register(
                 application.applicationContext,
                 xiaomiAppId,
                 xiaomiAppKey
             )
+            Log.d(TAG, "正在注册小米推送服务 isMiPushRegister:$isMiPushRegister...")
         }
         val huaweiAppId = appInfo.metaData.get("com.huawei.hms.client.appid")
         if (huaweiAppId != null && huaweiAppId.toString().isNotBlank()) {
