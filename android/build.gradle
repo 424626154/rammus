@@ -37,7 +37,7 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 32
-
+    namespace 'com.jarvanmo.rammus'
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
