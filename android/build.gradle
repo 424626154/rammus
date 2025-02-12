@@ -50,7 +50,7 @@ android {
         disable 'InvalidPackage'
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '1.8'
     }
 }
 
