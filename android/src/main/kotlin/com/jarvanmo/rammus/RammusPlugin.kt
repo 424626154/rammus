@@ -25,7 +25,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
 
 
 class RammusPlugin : FlutterPlugin, MethodCallHandler {
@@ -37,11 +36,7 @@ class RammusPlugin : FlutterPlugin, MethodCallHandler {
         private const val TAG = "RammusPlugin"
         private val inHandler = Handler()
         private var gottenApplication : Application? = null
-        @JvmStatic
-        fun registerWith(registrar: Registrar) {
-            val instance = RammusPlugin()
-            instance.onAttachedToEngine(registrar.context(), registrar.messenger())
-        }
+
         @JvmStatic
         fun initPushService(application: Application){
 //            createNotificationChannel(application);
@@ -173,14 +168,14 @@ class RammusPlugin : FlutterPlugin, MethodCallHandler {
         if ((gcmSendId != null && gcmSendId.isNotBlank())
             && (gcmApplicationId != null && gcmApplicationId.isNotBlank())
         ) {
-            Log.d(TAG, "正在注册Gcm推送服务...")
-            GcmRegister.register(
-                application.applicationContext,
-                gcmSendId,
-                gcmApplicationId,
-                gcmProjectId,
-                gcmApiKey
-            )
+//            Log.d(TAG, "正在注册Gcm推送服务...")
+//            GcmRegister.register(
+//                application.applicationContext,
+//                gcmSendId,
+//                gcmApplicationId,
+//                gcmProjectId,
+//                gcmApiKey
+//            )
         }
     }
 
