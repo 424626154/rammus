@@ -74,5 +74,5 @@ dependencies {
     //魅族依赖
     implementation "com.aliyun.ams:alicloud-android-third-push-meizu:$ali_push_version"
     //谷歌依赖
-    implementation "com.aliyun.ams:alicloud-android-third-push-fcm:$ali_push_version"
+//    implementation "com.aliyun.ams:alicloud-android-third-push-fcm:$ali_push_version"
 }
